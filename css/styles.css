@@ -70,3 +70,10 @@ button {
 .player-controls button {
     border-radius: 4px;
 }
+
+.intro-text {
+    text-align: center;
+    font-size: 18px;
+    margin: 30px 0;
+    color: #333;
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://sdk.scdn.co; connect-src https://api.spotify.com;">
+    <title>QR Music Hits - Create Teams</title>
+    <link rel="stylesheet" href="../css/team-creation.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Teams</h1>
+
+        <div class="teams-container">
+            <div class="team-form">
+                <div class="input-group">
+                    <input type="text" id="team-name" placeholder="Enter team name...">
+                    <button id="add-team-btn">Add Team</button>
+                </div>
+            </div>
+
+            <div class="teams-list" id="teams-list">
+                <!-- Teams will be dynamically added here -->
+                <div class="no-teams-message" id="no-teams-message">
+                    No teams added yet. Add at least one team to continue.
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="continue-button" disabled>Continue to Game</button>
+        </div>
+    </div>
+
+    <script src="../js/team-creation.js"></script>
+</body>
+</html>

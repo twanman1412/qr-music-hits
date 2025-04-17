@@ -52,11 +52,15 @@ async function initiateSpotifyLogin() {
        console.log("Token exchange successful, storing tokens...");
 
        const tokenData = await tokenResponse.json();
+       console.log(tokenData)
        spotifyTokens.access_token = tokenData.access_token;
        spotifyTokens.expires_at = Date.now() + (tokenData.expires_in * 1000);
        if (tokenData.refresh_token) {
            spotifyTokens.refresh_token = tokenData.refresh_token;
        }
+
+       window.localStorage.setItem("spotifyTokens", JSON.stringify(spotifyTokens));
+       await new Promise(r => setTimeout(r, 10000)); // Wait for 1 second
 
        return true;
     } catch (error) {
@@ -65,51 +69,14 @@ async function initiateSpotifyLogin() {
     }
 }
 
-// Initialize the Web Playback SDK
-function initializePlayer() {
-    return new Promise((resolve, reject) => {
-        window.onSpotifyWebPlaybackSDKReady = () => {
-            player = new Spotify.Player({
-                name: 'QR Music Hits Player',
-                getOAuthToken: cb => cb(spotifyTokens.access_token),
-                volume: 0.5
-            });
-
-            // Error handling
-            player.addListener('initialization_error', ({ message }) => {
-                console.error('Initialization error:', message);
-                reject(message);
-            });
-
-            player.addListener('authentication_error', ({ message }) => {
-                console.error('Authentication error:', message);
-                reject(message);
-            });
-
-            player.addListener('account_error', ({ message }) => {
-                console.error('Account error:', message);
-                reject('Premium account required');
-            });
-
-            player.addListener('playback_error', ({ message }) => {
-                console.error('Playback error:', message);
-            });
-
-            // Ready
-            player.addListener('ready', ({ device_id }) => {
-                console.log('Ready with Device ID', device_id);
-                deviceId = device_id;
-                resolve(device_id);
-            });
-
-            // Connect to the player
-            player.connect();
-        };
-    });
-}
-
 // Check if user is authenticated
 function isAuthenticated() {
+    if (!(spotifyTokens.access_token && spotifyTokens.expires_at > Date.now())) {
+        loadSpotifyTokens();
+    }
+    console.log(`Access token: ${spotifyTokens.access_token}`);
+    console.log(`Current time: ${Date.now()}`);
+    console.log(`Expires at: ${spotifyTokens.expires_at}`);
     return spotifyTokens.access_token && spotifyTokens.expires_at > Date.now();
 }
 
@@ -154,6 +121,7 @@ async function playTrack(trackId) {
         });
     } else {
         // Fallback to playing on active device
+        console.log("playing track locally")
         return spotifyRequest('/me/player/play', 'PUT', {
             uris: [`spotify:track:${trackId}`]
         });
@@ -182,5 +150,16 @@ export {
     pauseTrack,
     resumeTrack,
     getTrackInfo,
-    initializePlayer
 };
+
+function loadSpotifyTokens() {
+    let receivedTokens = window.localStorage.getItem("spotifyTokens");
+    if (receivedTokens) {
+        spotifyTokens = JSON.parse(receivedTokens);
+    } else {
+        spotifyTokens = {
+            access_token: null,
+            expires_at: null
+        };
+    }
+}
