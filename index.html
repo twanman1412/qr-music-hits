@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://sdk.scdn.co; connect-src https://api.spotify.com;">
+    <title>QR Music Hits</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Music Hits</h1>
+
+        <div id="login-section">
+            <button id="login-button">Login with Spotify</button>
+        </div>
+
+        <div id="player-section" class="hidden">
+            <div class="input-group">
+                <input type="text" id="spotify-link" placeholder="Enter Spotify track link...">
+                <button id="play-button">Play</button>
+            </div>
+
+            <div id="song-info" class="hidden">
+                <h2>Now Playing</h2>
+                <div class="song-details">
+                    <p><strong>Title:</strong> <span id="song-title">-</span></p>
+                    <p><strong>Artist:</strong> <span id="song-artist">-</span></p>
+                    <p><strong>Release Year:</strong> <span id="song-year">-</span></p>
+                    <p><strong>Album:</strong> <span id="song-album">-</span></p>
+                </div>
+                <div class="player-controls">
+                    <button id="pause-button">Pause</button>
+                    <button id="resume-button">Resume</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/renderer.js"></script>
+</body>
+</html>

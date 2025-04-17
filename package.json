@@ -1,0 +1,25 @@
+{
+  "name": "qr-music-hits",
+  "version": "1.0.0",
+  "description": "An electron app to play the game qr-music-hits",
+  "homepage": "https://github.com/twanman1412/qr-music-hits#readme",
+  "bugs": {
+    "url": "https://github.com/twanman1412/qr-music-hits/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twanman1412/qr-music-hits.git"
+  },
+  "license": "MIT",
+  "author": "Twan Kuipers",
+  "type": "commonjs",
+  "main": "js/electron.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "electron": "^35.1.5",
+    "node-fetch": "^2.7.0"
+  }
+}
