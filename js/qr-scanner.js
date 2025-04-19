@@ -67,14 +67,32 @@ function handleManualSubmit() {
     }
 }
 
-// Start QR Scanner
 async function startScanner() {
-    // Same as existing code
+    try {
+        const config = { fps: 10, qrbox: 250 };
+        await html5QrCode.start(
+            { facingMode: 'environment' }, // Use rear camera
+            config,
+            handleScanSuccess
+        );
+        startScannerButton.classList.add('hidden');
+        stopScannerButton.classList.remove('hidden');
+    } catch (error) {
+        console.error('Error starting scanner:', error);
+        alert('Failed to start scanner.');
+    }
 }
 
 // Stop QR Scanner
 async function stopScanner() {
-    // Same as existing code
+    try {
+        await html5QrCode.stop();
+        startScannerButton.classList.remove('hidden');
+        stopScannerButton.classList.add('hidden');
+    } catch (error) {
+        console.error('Error stopping scanner:', error);
+        alert('Failed to stop scanner.');
+    }
 }
 
 // Handle QR Code Scan Success
