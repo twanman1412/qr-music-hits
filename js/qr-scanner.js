@@ -11,10 +11,12 @@ const manualTrackUrl = document.getElementById('manual-track-url');
 const manualSubmitButton = document.getElementById('manual-submit');
 const continueButton = document.getElementById('continue-button');
 const cameraSelect = document.getElementById('camera-select')
+const joraCardToggle = document.getElementById('jora-card-toggle');
 
 let html5QrCode;
 let scannedTrackId = null;
-let cameras = []
+let cameras = [];
+let isJoraCardActive = false;
 
 // Initialize QR Scanner
 function initializeQrScanner() {
@@ -64,12 +66,24 @@ function initializeQrScanner() {
     manualTrackUrl.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleManualSubmit();
     });
+
+   isJoraCardActive = localStorage.getItem('isJoraCardActive') === 'true' || false;
+   if (isJoraCardActive) {
+        joraCardToggle.checked = true;
+        document.querySelector('.toggle-label').textContent = 'On';
+    }
+
+    joraCardToggle.addEventListener('change', () => {
+        isJoraCardActive = joraCardToggle.checked;
+        document.querySelector('.toggle-label').textContent = isJoraCardActive ? 'On' : 'Off';
+        localStorage.setItem('isJoraCardActive', isJoraCardActive);
+    })
 }
 
 async function getCameras() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        cameras = devices.filter(device => device.kind == 'videoinput');
+        cameras = devices.filter(device => device.kind === 'videoinput');
 
         cameraSelect.innerHTML = '';
 
@@ -145,11 +159,27 @@ async function stopScanner() {
 }
 
 // Handle QR Code Scan Success
-function handleScanSuccess(decodedText) {
+async function handleScanSuccess(decodedText) {
     console.log('QR Code detected:', decodedText);
-    scannedTrackId = extractTrackId(decodedText);
 
-    if (scannedTrackId) {
+    let trackId = null;
+
+    if (isJoraCardActive) {
+        if (isJoraCardUrl(decodedText)) {
+            try {
+                trackId = await extractTrackIdFromJoraCard(decodedText);
+            } catch (error) {
+                console.error('Error processing Jora Card: ', error)
+                alert('Failed to process Jora Card. Please try again.');
+                return;
+            }
+        }
+    } else {
+        trackId = extractTrackId(decodedText);
+    }
+
+    if (trackId) {
+        scannedTrackId = trackId;
         scanResult.textContent = decodedText;
         resultContainer.classList.remove('hidden');
         continueButton.disabled = false;
@@ -164,6 +194,33 @@ function extractTrackId(url) {
     const match = url.match(/track[:\/]([a-zA-Z0-9]+)/);
     return match ? match[1] : null;
 }
+
+function isJoraCardUrl(url) {
+    return /^https?:\/\/joragames\.nl\/[a-zA-Z]*\/[0-9]*/.test(url);
+}
+
+async function extractTrackIdFromJoraCard(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch Jora Card page');
+        }
+
+        const html = await response.text();
+
+        const match = html.match(/window\.location\s*=\s*["']spotify:track:([a-zA-Z0-9]+)["']/);
+
+        if (match && match[1]) {
+            return match[1];
+        } else {
+            throw new Error('Could not find Spotify track ID in Jora Card');
+        }
+    } catch (error) {
+        console.error('Error processing Jora Card:', error);
+        throw error;
+    }
+}
+
 
 // Initialize the QR scanner on page load
 document.addEventListener('DOMContentLoaded', initializeQrScanner);
