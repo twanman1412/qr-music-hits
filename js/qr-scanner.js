@@ -10,14 +10,35 @@ const playScannedButton = document.getElementById('play-scanned');
 const manualTrackUrl = document.getElementById('manual-track-url');
 const manualSubmitButton = document.getElementById('manual-submit');
 const continueButton = document.getElementById('continue-button');
+const cameraSelect = document.getElementById('camera-select')
 
 let html5QrCode;
 let scannedTrackId = null;
+let cameras = []
 
 // Initialize QR Scanner
 function initializeQrScanner() {
-    const videoElement = document.getElementById('video');
+    const videoElement = document.getElementById('scanner-container');
     html5QrCode = new Html5Qrcode(videoElement.id);
+
+    navigator.mediaDevices.getUserMedia({ video: true})
+        .then(stream => {
+            stream.getTracks().forEach(track => track.stop());
+            getCameras();
+        })
+        .catch(error => {
+            console.error('Camera access denied: ', error);
+            alert('Please allow camera access to use the scanner');
+        });
+
+    cameraSelect.addEventListener('change', () => {
+
+        if (html5QrCode.isScannig) {
+            stopScanner().then(() => startScanner());
+        }
+
+        localStorage.setItem('preferredCameraId', cameraSelect.value);
+    });
 
     startScannerButton.addEventListener('click', startScanner);
     stopScannerButton.addEventListener('click', stopScanner);
@@ -45,6 +66,29 @@ function initializeQrScanner() {
     });
 }
 
+async function getCameras() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameras = devices.filter(device => device.kind == 'videoinput');
+
+        cameraSelect.innerHTML = '';
+
+        cameras.forEach((camera, index) => {
+            const option = document.createElement('option');
+            option.value = camera.deviceId;
+            option.text = camera.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+        });
+
+        const savedCameraId = localStorage.getItem('preferredCameraId');
+        if (savedCameraId) {
+            cameraSelect.value = savedCameraId;
+        }
+    } catch (error) {
+        console.error('Error getting cameras: ', error);
+    }
+}
+
 // Handle manual track URL submission
 function handleManualSubmit() {
     const url = manualTrackUrl.value.trim();
@@ -69,9 +113,14 @@ function handleManualSubmit() {
 
 async function startScanner() {
     try {
+        const selectedCameraId = cameraSelect.value;
         const config = { fps: 10, qrbox: 250 };
+
+        const cameraConfig = selectedCameraId 
+            ? { deviceId: selectedCameraId }
+            : { facingMode: 'environment' };
         await html5QrCode.start(
-            { facingMode: 'environment' }, // Use rear camera
+            cameraConfig,
             config,
             handleScanSuccess
         );

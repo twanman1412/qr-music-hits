@@ -11,14 +11,19 @@
         <h1>QR Music Hits Scanner</h1>
 
         <div id="scanner-section">
+            <div id='scanner-container'></div>
             <div id="video-container">
-                <video id="video" playsinline></video>
+                <video id="video" playsinline class="hidden"></video>
                 <canvas id="canvas" class="hidden"></canvas>
                 <div id="scan-region"></div>
             </div>
             <div class="controls">
                 <button id="start-scanner">Start Scanner</button>
                 <button id="stop-scanner" class="hidden">Stop Scanner</button>
+            </div>
+            <div class="camera-selection">
+                    <label for="camera=select">Select Camera: </label>
+                    <select id="camera-select"></select>
             </div>
 
             <div class="manual-input-section">

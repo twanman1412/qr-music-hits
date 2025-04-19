@@ -131,3 +131,9 @@ input[type="text"] {
     background-color: #a9a9a9;
     cursor: not-allowed;
 }
+
+#scanner-container {
+    width: 100%;
+    min-height: 300px;
+    border: 1px solid #ddd;
+}
