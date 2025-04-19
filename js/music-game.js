@@ -132,10 +132,12 @@ async function initializeGame() {
 
     try {
         // Load track info
-        await loadTrackInfo();
+        const doPlay = await loadTrackInfo();
 
         // Start playing the track
-        await playTrack(currentTrackId);
+        if (doPlay) {
+            await playTrack(currentTrackId);
+        }
         isPlaying = true;
         pauseButton.textContent = 'Pause';
 
@@ -148,13 +150,8 @@ async function initializeGame() {
 // Load track information
 async function loadTrackInfo() {
     try {
-        if (playedSongs.includes(currentTrackId)) {
-            alert('This song has already been played! Scan a new track.');
-            scanNewTrack();
-            return;
-        }
-
         currentTrackInfo = await getTrackInfo(currentTrackId);
+        console.log(JSON.stringify(currentTrackInfo))
 
         // Display track info in the player section
         trackName.textContent = currentTrackInfo.name;
@@ -165,9 +162,17 @@ async function loadTrackInfo() {
             albumArt.style.backgroundImage = `url(${currentTrackInfo.album.images[0].url})`;
         }
 
-        trackInfo.classList.remove('hidden');
-        playedSongs.push(currentTrackId);
-        localStorage.setItem('playedSongs', JSON.stringify(playedSongs));
+        if (playedSongs.includes(currentTrackId)) {
+            trackInfo.classList.remove('hidden');
+            const lastAnswer = localStorage.getItem('lastAnswer');
+            await submitAnswer(lastAnswer, false);
+            return false;
+        } else {
+            playedSongs.push(currentTrackId);
+            localStorage.setItem('playedSongs', JSON.stringify(playedSongs));
+            return true;
+        }
+
     } catch (error) {
         console.error('Error loading track info:', error);
     }
@@ -190,7 +195,9 @@ async function togglePlayPause() {
 }
 
 // Submit answer and check if correct
-async function submitAnswer(answer) {
+async function submitAnswer(answer, doPoints = true) {
+
+    trackInfo.classList.remove('hidden');
     // Disable answer buttons to prevent double submissions
     beforeBtn.disabled = true;
     afterBtn.disabled = true;
@@ -199,6 +206,8 @@ async function submitAnswer(answer) {
     const isCorrect =
         (answer === 'before' && releaseYear <= comparisonYear) ||
         (answer === 'after' && releaseYear >= comparisonYear);
+
+    localStorage.setItem('lastAnswer', answer);
 
     // Update display with result
     resultMessage.textContent = isCorrect ?
@@ -211,33 +220,31 @@ async function submitAnswer(answer) {
     releaseYearElement.textContent = String(releaseYear);
     albumNameElement.textContent = currentTrackInfo.album.name;
 
-    const activeTeam = teams[activeTeamIndex];
-    // Update score if correct
-    if (isCorrect) {
-        const teamScores = JSON.parse(localStorage.getItem('teamScores'));
-        teamScores[activeTeam] += 1;
-        localStorage.setItem('teamScores', JSON.stringify(teamScores));
+    if (doPoints) {
+        const activeTeam = teams[activeTeamIndex];
+        // Update score if correct
+        if (isCorrect) {
+            const teamScores = JSON.parse(localStorage.getItem('teamScores'));
+            teamScores[activeTeam] += 1;
+            localStorage.setItem('teamScores', JSON.stringify(teamScores));
 
-        // Update score display
-        updatePlayerDisplay();
+            // Update score display
+            updatePlayerDisplay();
 
-        // Save track history
-        saveTrackHistory(activeTeam, isCorrect);
+            // Save track history
+            saveTrackHistory(activeTeam, isCorrect);
 
-        // Check for win condition
-        if (teamScores[activeTeam] >= 10) {
-            localStorage.setItem('winnerTeam', activeTeam);
-            window.location.href = '../pages/victory.html';
-            return;
+            // Check for win condition
+            if (teamScores[activeTeam] >= 10) {
+                localStorage.setItem('winnerTeam', activeTeam);
+                window.location.href = '../pages/victory.html';
+                return;
+            }
+        } else {
+            // Save track history for incorrect answer too
+            saveTrackHistory(activeTeam, isCorrect);
         }
-    } else {
-        // Save track history for incorrect answer too
-        saveTrackHistory(activeTeam, isCorrect);
     }
-
-    // Move to next player
-    activeTeamIndex = (activeTeamIndex + 1) % teams.length;
-    localStorage.setItem('activeTeamIndex', activeTeamIndex.toString());
 
     // Show result and next button
     questionContainer.classList.add('hidden');
@@ -267,8 +274,9 @@ function updatePlayerDisplay() {
 // Move to next player and scan new track
 function scanNewTrack() {
 
-    // Update display
-    updatePlayerDisplay();
+    // Move to next player
+    activeTeamIndex = (activeTeamIndex + 1) % teams.length;
+    localStorage.setItem('activeTeamIndex', activeTeamIndex.toString());
 
     // Redirect to scanner
     window.location.href = '../pages/qr-scanner.html';
