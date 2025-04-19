@@ -32,6 +32,9 @@ function initializeVictory() {
     // Create confetti animation
     createConfetti();
 
+    localStorage.removeItem('winnerTeam');
+    localStorage.removeItem('teamScores');
+
     // Store current page for navigation tracking
     localStorage.setItem('currentPage', 'victory');
 }

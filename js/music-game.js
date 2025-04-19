@@ -42,6 +42,7 @@ let playedSongs = JSON.parse(localStorage.getItem('playedSongs') || '[]');
 
 // Add this function after the other functions
 function viewLeaderboard() {
+    localStorage.setItem("currentPage", "music-game");
     window.location.href = '../pages/leaderboard.html';
 }
 
@@ -196,7 +197,7 @@ async function submitAnswer(answer) {
 
     const releaseYear = new Date(currentTrackInfo.album.release_date).getFullYear();
     const isCorrect =
-        (answer === 'before' && releaseYear < comparisonYear) ||
+        (answer === 'before' && releaseYear <= comparisonYear) ||
         (answer === 'after' && releaseYear >= comparisonYear);
 
     // Update display with result
@@ -207,13 +208,13 @@ async function submitAnswer(answer) {
     resultContainer.className = isCorrect ? 'result-correct' : 'result-incorrect';
 
     // Show song details
-    releaseYearElement.textContent = releaseYear;
+    releaseYearElement.textContent = String(releaseYear);
     albumNameElement.textContent = currentTrackInfo.album.name;
 
+    const activeTeam = teams[activeTeamIndex];
     // Update score if correct
     if (isCorrect) {
         const teamScores = JSON.parse(localStorage.getItem('teamScores'));
-        const activeTeam = teams[activeTeamIndex];
         teamScores[activeTeam] += 1;
         localStorage.setItem('teamScores', JSON.stringify(teamScores));
 
@@ -233,6 +234,10 @@ async function submitAnswer(answer) {
         // Save track history for incorrect answer too
         saveTrackHistory(activeTeam, isCorrect);
     }
+
+    // Move to next player
+    activeTeamIndex = (activeTeamIndex + 1) % teams.length;
+    localStorage.setItem('activeTeamIndex', activeTeamIndex.toString());
 
     // Show result and next button
     questionContainer.classList.add('hidden');
@@ -261,9 +266,6 @@ function updatePlayerDisplay() {
 
 // Move to next player and scan new track
 function scanNewTrack() {
-    // Move to next player
-    activeTeamIndex = (activeTeamIndex + 1) % teams.length;
-    localStorage.setItem('activeTeamIndex', activeTeamIndex.toString());
 
     // Update display
     updatePlayerDisplay();

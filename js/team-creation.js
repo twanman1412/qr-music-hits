@@ -4,7 +4,7 @@ const addTeamBtn = document.getElementById('add-team-btn');
 const teamsList = document.getElementById('teams-list');
 const noTeamsMessage = document.getElementById('no-teams-message');
 const continueButton = document.getElementById('continue-button');
-const backButton = document.getElementById('back-button');
+const clearButton = document.getElementById('clear-button')
 
 // Teams array
 let teams = [];
@@ -23,6 +23,18 @@ function initialize() {
     continueButton.addEventListener('click', () => {
         saveTeams();
         window.location.href = '../pages/difficulty-selection.html';
+    });
+
+    clearButton.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all teams and game data?')) {
+
+            spotifyTokens = localStorage.getItem("spotifyTokens");
+            localStorage.clear()
+            localStorage.setItem("spotifyTokens", spotifyTokens);
+            teams = [];
+            updateTeamsList();
+            saveTeams();
+        }
     });
 
     updateTeamsList();

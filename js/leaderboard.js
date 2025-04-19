@@ -9,6 +9,7 @@ function initialize() {
         const previousPage = localStorage.getItem('currentPage') || 'index';
 
         if (previousPage === 'victory') {
+            window.alert("come from victory")
             window.location.href = '../pages/victory.html';
         } else {
             window.location.href = '../pages/music-game.html';

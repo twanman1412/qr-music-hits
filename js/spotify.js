@@ -60,8 +60,6 @@ async function initiateSpotifyLogin() {
        }
 
        window.localStorage.setItem("spotifyTokens", JSON.stringify(spotifyTokens));
-       await new Promise(r => setTimeout(r, 10000)); // Wait for 1 second
-
        return true;
     } catch (error) {
         console.error("Authentication error:", error);
@@ -105,7 +103,13 @@ async function spotifyRequest(endpoint, method = 'GET', body = null) {
     }
 
     if (response.status !== 204) { // No content
-        return response.json();
+        try {
+            const json = await response.json();
+            return json;
+        } catch (error) {
+            console.warn("Failed to parse JSON response:", error);
+            return null;
+        }
     }
 
     return null;
@@ -114,23 +118,20 @@ async function spotifyRequest(endpoint, method = 'GET', body = null) {
 
 // Updated playTrack function to use the SDK
 async function playTrack(trackId) {
-    if (deviceId) {
-        // Play on our Web Playback SDK instance
-        return spotifyRequest(`/me/player/play?device_id=${deviceId}`, 'PUT', {
-            uris: [`spotify:track:${trackId}`]
-        });
-    } else {
-        // Fallback to playing on active device
-        console.log("playing track locally")
-        return spotifyRequest('/me/player/play', 'PUT', {
-            uris: [`spotify:track:${trackId}`]
-        });
-    }
+    // Fallback to playing on active device
+    return spotifyRequest('/me/player/play', 'PUT', {
+        uris: [`spotify:track:${trackId}`]
+    });
 }
 
 // Pause playback
 async function pauseTrack() {
-    return spotifyRequest('/me/player/pause', 'PUT');
+    try {
+        return spotifyRequest('/me/player/pause', 'PUT');
+    } catch (error) {
+        console.error('Error pausing track:', error);
+        return;
+    }
 }
 
 // Resume playback

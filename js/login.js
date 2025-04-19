@@ -20,10 +20,6 @@ loginButton.addEventListener('click', async () => {
         console.log("Initiating Spotify login...");
         await initiateSpotifyLogin();
 
-        // Initialize Spotify Web Playback SDK
-        console.log("Initializing Spotify Player...");
-        await initializePlayer();
-
         // Redirect to difficulty selection page
         console.log("Login successful, redirecting to difficulty selection...");
         redirectToDifficultySelection();
