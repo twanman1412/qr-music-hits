@@ -161,11 +161,15 @@ async function stopScanner() {
 // Handle QR Code Scan Success
 async function handleScanSuccess(decodedText) {
     console.log('QR Code detected:', decodedText);
+    stopScanner();
 
     let trackId = null;
 
     if (isJoraCardActive) {
+        console.log("JORAAA")
+        console.log()
         if (isJoraCardUrl(decodedText)) {
+            console.log("its JORAAA URL")
             try {
                 trackId = await extractTrackIdFromJoraCard(decodedText);
             } catch (error) {
@@ -179,11 +183,10 @@ async function handleScanSuccess(decodedText) {
     }
 
     if (trackId) {
-        scannedTrackId = trackId;
-        scanResult.textContent = decodedText;
-        resultContainer.classList.remove('hidden');
-        continueButton.disabled = false;
-        stopScanner();
+        if (trackId) {
+            localStorage.setItem('selectedTrackId', trackId);
+            window.location.href = '../pages/music-game.html';
+        }
     } else {
         alert('Invalid QR code. Please scan a valid Spotify track link.');
     }
@@ -196,12 +199,12 @@ function extractTrackId(url) {
 }
 
 function isJoraCardUrl(url) {
-    return /^https?:\/\/joragames\.nl\/[a-zA-Z]*\/[0-9]*/.test(url);
+    return /^joragames\.nl\/[a-zA-Z]*\/[0-9]*/.test(url);
 }
 
 async function extractTrackIdFromJoraCard(url) {
     try {
-        const response = await fetch(url);
+        const response = await fetch(`https://${url}`);
         if (!response.ok) {
             throw new Error('Failed to fetch Jora Card page');
         }

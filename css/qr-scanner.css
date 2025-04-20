@@ -20,7 +20,7 @@ h1 {
     display: none;
 }
 
-#video-container {
+#scanner-container {
     position: relative;
     width: 100%;
     max-width: 500px;
@@ -35,17 +35,6 @@ h1 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-#scan-region {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 250px;
-    height: 250px;
-    border: 2px solid #1DB954;
-    border-radius: 8px;
 }
 
 #canvas {
@@ -130,10 +119,4 @@ input[type="text"] {
 #continue-button:disabled {
     background-color: #a9a9a9;
     cursor: not-allowed;
-}
-
-#scanner-container {
-    width: 100%;
-    min-height: 300px;
-    border: 1px solid #ddd;
 }
