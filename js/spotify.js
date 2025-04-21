@@ -1,17 +1,11 @@
 const { ipcRenderer } = window.require('electron');
 const fetch = require('node-fetch');
 
-// Store authentication tokens
 let spotifyTokens = {
     access_token: null,
     expires_at: null
 };
 
-let player = null;
-let deviceId = null;
-
-
-// Initialize Spotify authentication
 async function initiateSpotifyLogin() {
     try {
         const { result_code, code_verifier } = await ipcRenderer.invoke('open-auth-window');
@@ -72,9 +66,6 @@ function isAuthenticated() {
     if (!(spotifyTokens.access_token && spotifyTokens.expires_at > Date.now())) {
         loadSpotifyTokens();
     }
-    console.log(`Access token: ${spotifyTokens.access_token}`);
-    console.log(`Current time: ${Date.now()}`);
-    console.log(`Expires at: ${spotifyTokens.expires_at}`);
     return spotifyTokens.access_token && spotifyTokens.expires_at > Date.now();
 }
 
@@ -130,7 +121,7 @@ async function pauseTrack() {
         return spotifyRequest('/me/player/pause', 'PUT');
     } catch (error) {
         console.error('Error pausing track:', error);
-        return;
+
     }
 }
 
@@ -139,19 +130,57 @@ async function resumeTrack() {
     return spotifyRequest('/me/player/play', 'PUT');
 }
 
-// Get track information
+// Get playlist information
+async function getPlaylistInfo(playlistId) {
+    try {
+        const playlistData = await spotifyRequest(`/playlists/${playlistId}`);
+        return playlistData;
+    } catch (error) {
+        console.error('Error fetching playlist info:', error);
+        throw error;
+    }
+}
+
+// Get all tracks from a playlist (handles pagination)
+async function getPlaylistTracks(playlistId) {
+    try {
+        let allTracks = [];
+        let url = `/playlists/${playlistId}/tracks?limit=100`;
+        let hasMore = true;
+
+        while (hasMore) {
+            const response = await spotifyRequest(url);
+
+            const tracks = response.items.map(item => ({
+                id: item.track.id,
+                name: item.track.name,
+                artist: item.track.artists.map(artist => artist.name).join(', '),
+                album: item.track.album.name,
+                releaseYear: new Date(item.track.album.release_date).getFullYear(),
+                previewUrl: item.track.preview_url,
+                imageUrl: item.track.album.images[0]?.url
+            }));
+
+            allTracks = [...allTracks, ...tracks];
+
+            if (response.next) {
+                // Extract just the path portion for the next request
+                url = response.next.replace('https://api.spotify.com/v1', '');
+            } else {
+                hasMore = false;
+            }
+        }
+
+        return allTracks;
+    } catch (error) {
+        console.error('Error fetching playlist tracks:', error);
+        throw error;
+    }
+}
+
 async function getTrackInfo(trackId) {
     return spotifyRequest(`/tracks/${trackId}`);
 }
-
-export {
-    initiateSpotifyLogin,
-    isAuthenticated,
-    playTrack,
-    pauseTrack,
-    resumeTrack,
-    getTrackInfo,
-};
 
 function loadSpotifyTokens() {
     let receivedTokens = window.localStorage.getItem("spotifyTokens");
@@ -164,3 +193,14 @@ function loadSpotifyTokens() {
         };
     }
 }
+
+export {
+    initiateSpotifyLogin,
+    isAuthenticated,
+    playTrack,
+    pauseTrack,
+    resumeTrack,
+    getTrackInfo,
+    getPlaylistInfo,
+    getPlaylistTracks
+};

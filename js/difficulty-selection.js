@@ -48,9 +48,20 @@ function startGame() {
 
     // Store the selected difficulty in localStorage
     localStorage.setItem('gameDifficulty', selectedDifficulty);
-
-    // Redirect to the game page
-    window.location.href =  require('path').join(__dirname, 'music-game.html');
+    switch (selectedDifficulty) {
+        case "easy":
+            window.location.href =  require('path').join(__dirname, 'music-game-jora.html');
+            break;
+        case "medium":
+            window.location.href =  require('path').join(__dirname, 'select-playlist.html');
+            break;
+        case "hard":
+            window.location.href =  require('path').join(__dirname, 'qr-scanner-gameless.html');
+            break;
+        default:
+            alert('Invalid difficulty level');
+            return;
+    }
 }
 
 // Initialize on page load

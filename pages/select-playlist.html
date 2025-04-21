@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Music Hits - Select Playlist</title>
+    <link rel="stylesheet" href="../css/select-playlist.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Select Music Playlist</h1>
+
+        <div class="playlist-selection">
+            <div class="input-section">
+                <h2>Enter Spotify Playlist URL</h2>
+                <div class="url-input">
+                    <input type="text" id="playlist-url" placeholder="https://open.spotify.com/playlist/..." />
+                    <button id="load-playlist-btn">Load Playlist</button>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h2>Playlist Preview</h2>
+                <div id="playlist-info" class="hidden">
+                    <div class="playlist-header">
+                        <div id="playlist-image"></div>
+                        <div class="playlist-details">
+                            <h3 id="playlist-name">Playlist Name</h3>
+                            <p id="playlist-owner">Created by: Owner</p>
+                            <p id="track-count">0 songs</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="tracks-container" class="tracks-list"></div>
+                <div class="loading" id="loading">Loading playlist data...</div>
+                <div class="error-message" id="error-message"></div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="back-button">Back</button>
+            <button id="use-playlist-btn" disabled>Use This Playlist</button>
+        </div>
+    </div>
+
+    <script type="module" src="../js/select-playlist.js"></script>
+</body>
+</html>
