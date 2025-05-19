@@ -2,10 +2,9 @@ const { app, BrowserWindow, shell, ipcMain } = require('electron');
 
 let mainWindow;
 
-// Replace with your own Spotify API credentials
 const config = require('./config')
 const CLIENT_ID = config.SPOTIFY_CLIENT_ID;
-const REDIRECT_URI = 'http://127.0.0.1:8888/callback';  // Changed from localhost to 127.0.0.1
+const REDIRECT_URI = 'http://127.0.0.1:8888/callback';
 const SCOPES = [
     'user-read-private',
     'user-read-email',
@@ -27,8 +26,6 @@ const createWindow = () => {
 
     mainWindow.maximize();
     mainWindow.loadFile('index.html');
-
-    // Open external links in browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
         return { action: 'deny' };
@@ -92,7 +89,6 @@ ipcMain.handle('open-auth-window', async () => {
             show: true
         });
 
-        // Register protocol interceptor before loading the URL
         const filter = {
             urls: [REDIRECT_URI + '*']
         };
@@ -104,7 +100,6 @@ ipcMain.handle('open-auth-window', async () => {
 
             if (urlObj.searchParams.has('code')) {
                 const authCode = urlObj.searchParams.get('code');
-                // Cancel the actual request
                 callback({ cancel: true });
                 authWindow.close();
                 console.log("Auth code received:", authCode);
@@ -114,32 +109,11 @@ ipcMain.handle('open-auth-window', async () => {
                 authWindow.close();
                 reject(new Error(urlObj.searchParams.get('error')));
             } else {
-                // Allow the request to proceed normally
                 callback({ cancel: false });
             }
         });
 
         await authWindow.loadURL(authUrl.toString());
-
-        // const handleRedirect = (event, url) => {
-        //     console.log("Do we get here?")
-        //     event.preventDefault();
-        //     const urlObj = new URL(url);
-        //     console.log(urlObj)
-        //     if (urlObj.searchParams.has('code')) {
-        //         console.log(urlObj.searchParams.get('code'))
-        //         const authCode = urlObj.searchParams.get('code');
-        //         authWindow.close();
-        //         resolve({authCode, codeVerifier});
-        //     } else if (urlObj.searchParams.has('error')) {
-        //         console.log("what?")
-        //         authWindow.close();
-        //         reject(new Error(urlObj.searchParams.get('error')));
-        //     }
-        // }
-        //
-        // authWindow.webContents.on("did-navigate", handleRedirect);
-        // authWindow.webContents.on('will-redirect', handleRedirect);
 
         authWindow.on('closed', () => {
             reject(new Error('Authentication was canceled'));

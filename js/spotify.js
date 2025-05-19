@@ -14,15 +14,19 @@ async function initiateSpotifyLogin() {
             throw new Error("Authentication failed");
         }
 
-
         const path = require('path');
-        const config = require(path.join(__dirname, 'js/config.js'));
+        let config;
+        try {
+            config = require(path.join(__dirname, 'js/config.js'));
+        } catch (e) {
+            try {
+                config = require(path.join(__dirname, '../js/config.js'));
+            } catch (e) {
+                console.error("Error loading config.js:", e);
+                throw new Error("Config file not found");
+            }
+        }
 
-        console.log("Token received, exchanging for access token...");
-        console.log(`Result code: ${result_code}`);
-        console.log(`Client ID: ${config.SPOTIFY_CLIENT_ID}`);
-
-       // Convert code to token
        const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
            method: 'POST',
            headers: {
@@ -61,7 +65,6 @@ async function initiateSpotifyLogin() {
     }
 }
 
-// Check if user is authenticated
 function isAuthenticated() {
     if (!(spotifyTokens.access_token && spotifyTokens.expires_at > Date.now())) {
         loadSpotifyTokens();
@@ -69,7 +72,6 @@ function isAuthenticated() {
     return spotifyTokens.access_token && spotifyTokens.expires_at > Date.now();
 }
 
-// Make API requests to Spotify
 async function spotifyRequest(endpoint, method = 'GET', body = null) {
     if (!isAuthenticated()) {
         throw new Error('Not authenticated with Spotify');
@@ -107,7 +109,6 @@ async function spotifyRequest(endpoint, method = 'GET', body = null) {
 }
 
 
-// Updated playTrack function to use the SDK
 async function playTrack(trackId) {
     // Fallback to playing on active device
     return spotifyRequest('/me/player/play', 'PUT', {
@@ -115,7 +116,6 @@ async function playTrack(trackId) {
     });
 }
 
-// Pause playback
 async function pauseTrack() {
     try {
         return spotifyRequest('/me/player/pause', 'PUT');
@@ -125,12 +125,10 @@ async function pauseTrack() {
     }
 }
 
-// Resume playback
 async function resumeTrack() {
     return spotifyRequest('/me/player/play', 'PUT');
 }
 
-// Get playlist information
 async function getPlaylistInfo(playlistId) {
     try {
         const playlistData = await spotifyRequest(`/playlists/${playlistId}`);
@@ -141,7 +139,6 @@ async function getPlaylistInfo(playlistId) {
     }
 }
 
-// Get all tracks from a playlist (handles pagination)
 async function getPlaylistTracks(playlistId) {
     try {
         let allTracks = [];
@@ -164,7 +161,6 @@ async function getPlaylistTracks(playlistId) {
             allTracks = [...allTracks, ...tracks];
 
             if (response.next) {
-                // Extract just the path portion for the next request
                 url = response.next.replace('https://api.spotify.com/v1', '');
             } else {
                 hasMore = false;

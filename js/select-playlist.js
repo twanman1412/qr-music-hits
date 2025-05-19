@@ -1,4 +1,3 @@
-// Get DOM elements
 const playlistUrlInput = document.getElementById('playlist-url');
 const loadPlaylistBtn = document.getElementById('load-playlist-btn');
 const usePlaylistBtn = document.getElementById('use-playlist-btn');
@@ -12,7 +11,6 @@ const tracksContainer = document.getElementById('tracks-container');
 const loadingElement = document.getElementById('loading');
 const errorMessage = document.getElementById('error-message');
 
-// Import Spotify functions - adjust the path if needed
 import { isAuthenticated, initiateSpotifyLogin, getPlaylistInfo, getPlaylistTracks } from './spotify.js';
 
 // Track list data
@@ -23,14 +21,11 @@ let currentPlaylist = {
     tracks: []
 };
 
-// Initialize the page
 async function initialize() {
-    // Add event listeners
     loadPlaylistBtn.addEventListener('click', handleLoadPlaylist);
     usePlaylistBtn.addEventListener('click', handleUsePlaylist);
     backButton.addEventListener('click', navigateBack);
 
-    // Check if authenticated with Spotify
     if (!isAuthenticated()) {
         try {
             await initiateSpotifyLogin();
@@ -41,7 +36,6 @@ async function initialize() {
     }
 }
 
-// Handle loading a playlist from URL
 async function handleLoadPlaylist() {
     const url = playlistUrlInput.value.trim();
 
@@ -50,7 +44,6 @@ async function handleLoadPlaylist() {
         return;
     }
 
-    // Extract playlist ID from URL
     const playlistId = extractPlaylistId(url);
 
     if (!playlistId) {
@@ -71,23 +64,16 @@ async function handleLoadPlaylist() {
     }
 }
 
-// Extract playlist ID from Spotify URL
 function extractPlaylistId(url) {
-    // Match patterns like: https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd
     const match = url.match(/playlist\/([a-zA-Z0-9]+)/);
     return match ? match[1] : null;
 }
 
-// Fetch real playlist data from Spotify API
 async function fetchRealPlaylistData(playlistId) {
     try {
-        // Get playlist info
         const playlistData = await getPlaylistInfo(playlistId);
-
-        // Get all tracks
         const tracks = await getPlaylistTracks(playlistId);
 
-        // Set current playlist
         currentPlaylist = {
             name: playlistData.name,
             owner: playlistData.owner.display_name,
@@ -102,13 +88,7 @@ async function fetchRealPlaylistData(playlistId) {
     }
 }
 
-// Rest of the functions (displayPlaylistInfo, renderTracks, etc.) remain the same
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', initialize);
-// Display the playlist information
 function displayPlaylistInfo() {
-    // Update UI with playlist info
     playlistName.textContent = currentPlaylist.name;
     playlistOwner.textContent = `Created by: ${currentPlaylist.owner}`;
     trackCount.textContent = `${currentPlaylist.tracks.length} songs`;
@@ -117,14 +97,11 @@ function displayPlaylistInfo() {
         playlistImage.style.backgroundImage = `url(${currentPlaylist.image})`;
     }
 
-    // Show the playlist info
     playlistInfo.classList.remove('hidden');
 
-    // Display tracks
     renderTracks();
 }
 
-// Render the tracks list
 function renderTracks() {
     tracksContainer.innerHTML = '';
 
@@ -149,13 +126,10 @@ function renderTracks() {
     }
 }
 
-// Handle using the selected playlist
 function handleUsePlaylist() {
-    // Randomize tracks
     const randomizedTracks = [...currentPlaylist.tracks];
     shuffleArray(randomizedTracks);
 
-    // Store in localStorage
     const playlistData = {
         name: currentPlaylist.name,
         owner: currentPlaylist.owner,
@@ -165,11 +139,9 @@ function handleUsePlaylist() {
 
     localStorage.setItem('gamePlaylist', JSON.stringify(playlistData));
 
-    // Navigate to difficulty selection
     window.location.href = require('path').join(__dirname, 'music-game-playlist.html');
 }
 
-// Shuffle array using Fisher-Yates algorithm
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -178,12 +150,10 @@ function shuffleArray(array) {
     return array;
 }
 
-// Navigate back to previous page
 function navigateBack() {
     window.location.href = require('path').join(__dirname, 'difficulty-selection.html');
 }
 
-// Show loading state
 function showLoading(isLoading) {
     if (isLoading) {
         loadingElement.style.display = 'block';
@@ -193,12 +163,10 @@ function showLoading(isLoading) {
     }
 }
 
-// Show error message
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.style.display = 'block';
     loadingElement.style.display = 'none';
 }
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', initialize);

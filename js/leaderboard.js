@@ -1,15 +1,11 @@
-// Get DOM elements
 const teamsLeaderboard = document.getElementById('teams-leaderboard');
 const backToGameBtn = document.getElementById('back-to-game-btn');
 
-// Initialize the leaderboard
 function initialize() {
-    // Add event listener to back button
     backToGameBtn.addEventListener('click', () => {
         const previousPage = localStorage.getItem('currentPage') || 'index';
 
         if (previousPage === 'victory') {
-            window.alert("come from victory")
             window.location.href = '../pages/victory.html';
         } else {
             switch (localStorage.getItem("gameDifficulty")) {
@@ -24,20 +20,16 @@ function initialize() {
         }
     });
 
-    // Load teams and scores from localStorage
     loadLeaderboard();
 }
 
-// Load the leaderboard data
 function loadLeaderboard() {
     const teams = JSON.parse(localStorage.getItem('musicGameTeams') || '[]');
     const teamScores = JSON.parse(localStorage.getItem('teamScores') || '{}');
     const trackHistory = JSON.parse(localStorage.getItem('trackHistory') || '{}');
 
-    // Sort teams by score, descending
     const sortedTeams = [...teams].sort((a, b) => (teamScores[b] || 0) - (teamScores[a] || 0));
 
-    // Clear the leaderboard
     teamsLeaderboard.innerHTML = '';
 
     if (sortedTeams.length === 0) {
@@ -45,7 +37,6 @@ function loadLeaderboard() {
         return;
     }
 
-    // Add teams to the leaderboard
     sortedTeams.forEach(team => {
         const teamItem = document.createElement('div');
         teamItem.className = 'team-item';
@@ -69,7 +60,6 @@ function loadLeaderboard() {
         teamHistory.className = 'team-history';
         teamHistory.id = `history-${team.replace(/\s+/g, '-')}`;
 
-        // Add track history if available
         const history = trackHistory[team] || [];
         if (history.length === 0) {
             teamHistory.innerHTML = '<p>No tracks played yet.</p>';
@@ -99,12 +89,10 @@ function loadLeaderboard() {
     });
 }
 
-// Toggle the team history section
 function toggleTeamHistory(team) {
     const historyId = `history-${team.replace(/\s+/g, '-')}`;
     const historyElement = document.getElementById(historyId);
     historyElement.classList.toggle('expanded');
 }
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', initialize);

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Music Hits - Music Game</title>
     <link rel="stylesheet" href="../css/music-game.css">
+    <link rel="stylesheet" href="../css/base.css">
 </head>
 <body>
     <div class="container">
@@ -20,9 +21,6 @@
                             <p id="artist-name">Artist Name</p>
                         </div>
                     </div>
-                    <div class="player-controls">
-                        <button id="pause-button">Pause</button>
-                    </div>
                 </div>
             </div>
 
@@ -30,7 +28,6 @@
                 <div class="game-header">
                     <div class="player-info">
                         <div class="active-player">Player: <span id="active-player">Team 1</span></div>
-                        <div class="difficulty-badge" id="difficulty-badge">Easy</div>
                     </div>
                     <div class="score">Score: <span id="score">0</span></div>
                 </div>
@@ -52,14 +49,14 @@
                             <p>Album: <span id="album-name"></span></p>
                         </div>
                         <button id="next-question-btn">Next Question</button>
+                        <button id="leaderboard-btn" class="secondary-btn">View Leaderboard</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="game-controls">
-            <button id="new-track-btn">Scan New Track</button>
-            <button id="back-button">Back to Difficulty</button>
+            <button id="back-button">Quit Game</button>
         </div>
     </div>
 

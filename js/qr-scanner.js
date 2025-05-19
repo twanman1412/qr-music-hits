@@ -50,13 +50,13 @@ function initializeQrScanner() {
     });
 
     playScannedButton.addEventListener('click', () => {
-        localStorage.setItem('selectedTrackId', scannedTrackId);
+        localStorage.setItem('currentTrackId', scannedTrackId);
         window.location.href = '../pages/music-game-jora.html';
     });
 
     continueButton.addEventListener('click', () => {
         if (scannedTrackId) {
-            localStorage.setItem('selectedTrackId', scannedTrackId);
+            localStorage.setItem('currentTrackId', scannedTrackId);
             window.location.href = '../pages/music-game-jora.html';
         }
     });
@@ -183,10 +183,8 @@ async function handleScanSuccess(decodedText) {
     }
 
     if (trackId) {
-        if (trackId) {
-            localStorage.setItem('selectedTrackId', trackId);
-            window.location.href = '../pages/music-game-jora.html';
-        }
+        localStorage.setItem('currentTrackId', trackId);
+        window.location.href = '../pages/music-game-jora.html';
     } else {
         alert('Invalid QR code. Please scan a valid Spotify track link.');
     }
